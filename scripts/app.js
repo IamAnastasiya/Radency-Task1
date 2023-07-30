@@ -12,8 +12,7 @@ const confirmTaskModalBtn = document.querySelector('.btn-confirm');
 
 const archiveToggler = document.querySelector('.archive-toggler');
 
-const userInputs = createTaskModal.querySelectorAll('input');
-const [inputName, inputTask] = userInputs;
+const [inputName, inputTask] = createTaskModal.querySelectorAll('input');
 const userSelect = createTaskModal.querySelector('select');
 
 
@@ -25,8 +24,7 @@ function toggleModalHandler() {
 function toggleArchiveHandler() {
     const archiveContainer = document.querySelector('.archive-container');
     archiveContainer.classList.toggle('visible');
-    archiveContainer.classList.contains('visible') ? 
-    archiveToggler.textContent = 'Hide Archived' : archiveToggler.textContent = 'Show Archived';
+    archiveToggler.textContent = archiveContainer.classList.contains('visible') ? 'Hide Archived' : 'Show Archived';
 }
 
 function clearUserInputs() {
@@ -59,14 +57,8 @@ function editTaskHandler (id) {
 
 function populateModalForEditing(id) {
     const editingTask = data.getCurrentTaskData(id);
-
-    inputName.value = editingTask.name;
-    inputTask.value = editingTask.task;
-
-    const currentTaskCategoryIndex = Array.from(userSelect.options).findIndex(
-        (option) => option.value === editingTask.category
-    );
-    userSelect.options.selectedIndex = currentTaskCategoryIndex;
+    [inputName.value, inputTask.value] = [editingTask.name, editingTask.task];
+    userSelect.value = editingTask.category;
 
     setEditTaskMode();
     toggleModalHandler();

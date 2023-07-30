@@ -114,14 +114,6 @@ export function moveTaskData(source, destination, id) {
     }
 }
 
-// export function addTaskToArchive (task) {
-//     archivedTasks.push(task);
-// }
-
-// export function getArchivedTask(id) {
-//     return archivedTasks.find(task => task.id === id);
-// }
-
 export function deleteTaskFromArchive (id) {
     archivedTasks = archivedTasks.filter(task => task.id !== id);
 }
