@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Hometask 1</title>
+        <link rel="stylesheet" href="https://unpkg.com/normalize.css">
+        <link rel="stylesheet" href="./styles.css">
+        <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600&display=swap" rel="stylesheet">
+        <script src="./scripts/app.js" defer type="module"></script>
+    </head>
+    <body>
+        <main class="main-wrapper">
+            <div id="backdrop"></div>
+            <div class="modal" id="open-modal">
+                <div class="modal-content">
+                    <label for="name">Name</label>
+                    <input type="text" name="name" id="task-name" />
+                    <label for="content">Task Content</label>
+                    <input type="text" name="content" id="task-content" />
+                    <label for="category">Category</label>
+                    <select id="task-category" name="category">
+                        <option value="task">Task</option>
+                        <option value="random-thought">Random Thought</option>
+                        <option value="idea">Idea</option>
+                        <option value="quote">Quote</option>
+                    </select>
+                </div>
+                <div class="modal-actions" mode="adding">
+                    <button class="modal-button btn-cancel">Cancel</button>
+                    <button class="modal-button btn-add">Add</button>
+                    <button class="modal-button btn-confirm">Confirm</button>
+                </div>
+            </div>
+
+
+
+            <section class="tasks-container">
+                <div class="tasks-header">
+                    <span class="icon-header"></span>
+                    <span>Name</span>
+                    <span>Created</span>
+                    <span>Category</span>
+                    <span>Content</span>
+                    <span>Dates</span>
+                    <span class="edit-header"></span>
+                    <img src="./assets//images/archive.png" alt="archive" width="20" height="20"/>
+                    <img src="./assets//images/bin.png" alt="delete"  width="20" height="20" />
+                </div>
+
+                <ul class="tasks-list">
+                    <template id="task-template">
+                        <li class="task-wrapper">
+                            <div class="task-icon">
+                                <img src="" alt="task_category" width="20" height="20"/>
+                            </div>
+                            <span class="task-name"></span>
+                            <span class="task-date"></span>
+                            <span class="task-category"></span>
+                            <span class="task-content"></span>
+                            <span class="task-dates"></span>
+                            <button class="task-action edit">
+                                <img class="task-action-img" src="./assets//images/pencil.png" alt="edit" width="20" height="20"/>
+                            </button>
+                            <button class="task-action archive">
+                                <img class="task-action-img" src="./assets//images/archive.png" alt="archive" width="20" height="20"/>
+                            </button>
+                            <button class="task-action delete">
+                                <img class="task-action-img" src="./assets//images/bin.png" alt="delete"  width="20" height="20" />
+                            </button>
+                        </li>
+                    </template>
+                </ul>
+
+
+                <button class="task-action-create" id="create-task">Create Note</button>
+
+            </section>
+
+
+
+            <section class="summary-table">
+                <div class="summary-header">
+                    <span class="icon-header"></span>
+                    <span>Note Category</span>
+                    <span>Active</span>
+                    <span>Archived</span>
+                </div>
+
+                <div class="summary-task-wrapper">
+                    <div class="task-icon">
+                        <img src="./assets//images/shopping-cart.png"alt="task_category" width="20" height="20"/>
+                    </div>
+                    <span class="task-category">Task</span>
+                    <span class="tasks-active"></span>
+                    <span class="tasks-archived"></span>
+                </div>
+            </section>
+
+
+
+
+
+            <section class="tasks-container">
+                <div class="tasks-header">
+                    <span class="icon-header"></span>
+                    <span>Archived Name</span>
+                    <span>Created</span>
+                    <span>Category</span>
+                    <span>Content</span>
+                    <span>Dates</span>
+                    <span class="edit-header"></span>
+                    <img src="./assets//images/unarchive.png" alt="archive" width="20" height="20"/>
+                    <img src="./assets//images/bin.png" alt="delete"  width="20" height="20" />
+                </div>
+
+                <ul class="tasks-list">
+                    <template id="archive-template">
+                        <li class="archive-wrapper">
+                            <div class="task-icon">
+                                <img src="" alt="task_category" width="20" height="20"/>
+                            </div>
+                            <span class="task-name"></span>
+                            <span class="task-date"></span>
+                            <span class="task-category"></span>
+                            <span class="task-content"></span>
+                            <span class="task-dates"></span>
+                            <span class="edit-archive"></span>
+                            <button class="task-action unarchive">
+                                <img class="task-action-img" src="./assets//images/unarchive.png" alt="unarchive" width="25" height="25"/>
+                            </button>
+                            <button class="task-action archive-delete">
+                                <img class="task-action-img" src="./assets//images/bin.png" alt="archive-delete"  width="20" height="20" />
+                            </button>
+                        </li>
+                    </template>
+                </ul>
+
+            </section>
+
+
+        </main>
+    </body>
+</html>

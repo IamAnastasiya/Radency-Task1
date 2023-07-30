@@ -1,0 +1,219 @@
+.main-wrapper {
+    max-width: 925px;
+    width: 100%;
+    margin: 20px auto;
+    box-sizing: border-box;
+    font-family: 'Montserrat', sans-serif;
+    position: relative;
+}
+
+.tasks-container {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 80px;
+}
+
+.tasks-header {
+    display: grid;
+    grid-template-columns: 2fr 5fr repeat(2, 4fr) repeat(2, 5fr) repeat(3, 1fr);
+    grid-template-areas: "icon-header . . . . . edit-header . ."; 
+    grid-column-gap: 3px;
+    padding: 8px 15px;
+    margin-bottom: 10px;
+    background-color: rgba(153,153,153,255);
+    color: white;
+    font-weight: 600;
+    align-items: center;
+    border-radius: 5px;
+}
+
+.tasks-header > img {
+    filter: invert(100%);
+    margin: auto;
+}
+
+.icon-header { 
+    grid-area: icon-header; 
+}
+
+.edit-header { 
+    grid-area: edit-header; 
+}
+
+.task-wrapper,
+.archive-wrapper {
+    display: grid;
+    grid-template-columns: 2fr 5fr repeat(2, 4fr) repeat(2, 5fr) repeat(3, 1fr);
+    grid-column-gap: 3px;
+    padding: 8px 12px;
+    font-weight: 400;
+    background-color: rgba(232,234,245,255);
+    margin-bottom: 15px;
+    align-items: center;
+}
+
+.task-wrapper > span {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: rgb(88, 88, 88);
+}
+
+.task-icon {
+    background-color: rgba(97,97,97,255);
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    padding: 10px;
+}
+
+.task-icon > img {
+    filter: invert(100%);
+}
+
+.task-name {
+    font-weight: 600;
+}
+
+.task-wrapper .task-action,
+.archive-wrapper .task-action {
+    border: none;
+    background-color: transparent;
+    filter: invert(50%);
+    cursor: pointer;
+}
+
+.task-action-create {
+    align-self: end;
+    border: 2px solid black;
+    border-radius: 5px;
+    font-weight: 500;
+    padding: 5px;
+    background-color: rgb(224, 224, 224);
+    cursor: pointer;
+}
+
+.summary-header {
+    display: grid;
+    grid-template-columns: 1fr 6fr 3fr 4fr;
+    grid-template-areas: "icon-header . . ."; 
+    grid-column-gap: 3px;
+    padding: 8px 15px;
+    background-color: rgba(153,153,153,255);
+    color: white;
+    font-weight: 600;
+    align-items: center;
+    border-radius: 5px;
+    margin-bottom: 10px;
+}
+
+.summary-task-wrapper {
+    display: grid;
+    grid-template-columns: 1fr 6fr 3fr 4fr;
+    grid-column-gap: 3px;
+    padding: 8px 12px;
+    font-weight: 400;
+    background-color: rgba(232,234,245,255);
+    margin-bottom: 15px;
+    align-items: center;
+}
+
+.summary-task-wrapper > .task-category {
+    font-weight: 600;
+}
+
+.summary-task-wrapper > span {
+    color: rgb(88, 88, 88);
+}
+
+.tasks-list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.modal {
+    position: fixed;
+    z-index: 100;
+    max-width: 600px;
+    width: 100%;
+    top: 30vh;
+    left: 50%;
+    display: none;
+    transform: translate(-50%, -50%);
+}
+  
+.modal.visible {
+    display: block;
+    animation: fade-slide-in 0.3s ease-out forwards;
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.26);
+    font-weight: 600;
+}
+
+/* .modal .modal__title {
+    margin: 0;
+    padding: 1rem;
+    border-bottom: 1px solid #00329e;
+    background: #00329e;
+    color: white;
+    border-radius: 10px 10px 0 0;
+} */
+
+.modal .modal-content {
+    padding: 1rem;
+}
+
+.modal-content > input,
+.modal-content > label {
+    margin-bottom: 8px;
+}
+
+.modal .modal-actions {
+    padding: 1rem;
+    display: flex;
+    justify-content: flex-end;
+}
+
+.modal-button {
+    padding: 0.5rem 1.5rem;
+    border: 1px solid #65a7f3;
+    background: #65a7f3;
+    color: white;
+    border-radius: 6px;
+    box-shadow: 0 1px 8px rgba(0, 0, 0, 0.26);
+    cursor: pointer;
+    margin: 0 0.5rem;
+}
+
+.btn-confirm {
+    display: none;
+}
+
+.modal-button:hover {
+    background: #1a6bf9;
+    border-color: #1a6bf9;
+}
+
+#backdrop {
+    position: fixed;
+    width: 100%;
+    height: 100vh;
+    top: 0;
+    left: 0;
+    background: rgba(0, 0, 0, 0.75);
+    z-index: 10;
+    pointer-events: none;
+    display: none;
+}
+  
+#backdrop.visible {
+    display: block;
+    pointer-events: all;
+}
+  
+#open-modal .modal-content {
+    display: flex;
+    flex-direction: column;
+}
