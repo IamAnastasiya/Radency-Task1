@@ -68,26 +68,30 @@ function updateCurrentTask() {
     const editingTaskId = confirmTaskModalBtn.dataset.editingTaskId;
     const currentTaskElement = document.querySelector(`[data-task-id=${editingTaskId}]`);
 
-    const updatedValues = {
-        name: capitalizeFirstLetter(inputName.value),
-        task: capitalizeFirstLetter(inputTask.value),
-        category: userSelect.value,
-        dates: extractDates(inputTask.value),
-        iconPath: setCategoryIcon(userSelect.value)
+    try {
+        const updatedValues = {
+            name: capitalizeFirstLetter(inputName.value),
+            task: capitalizeFirstLetter(inputTask.value),
+            category: userSelect.value,
+            dates: extractDates(inputTask.value),
+            iconPath: setCategoryIcon(userSelect.value)
+        }
+
+        data.updateTaskData(editingTaskId, updatedValues);
+
+        currentTaskElement.querySelector('.task-name').textContent = updatedValues.name;
+        currentTaskElement.querySelector('.task-content').textContent = updatedValues.task;
+        currentTaskElement.querySelector('.task-category').textContent = formatCategoryName(updatedValues.category);
+        currentTaskElement.querySelector('.task-icon img').setAttribute('src', updatedValues.iconPath);
+        currentTaskElement.querySelector('.task-dates').textContent = updatedValues.dates;
+        delete confirmTaskModalBtn.dataset.editingTaskId;
+
+        toggleModalHandler();
+        clearUserInputs();
+        setAddTaskMode();
+    } catch (error) {
+        console.error('An error occurred while updating the task:', error);
     }
-
-    data.updateTaskData(editingTaskId, updatedValues);
-
-    currentTaskElement.querySelector('.task-name').textContent = updatedValues.name;
-    currentTaskElement.querySelector('.task-content').textContent = updatedValues.task;
-    currentTaskElement.querySelector('.task-category').textContent = formatCategoryName(updatedValues.category);
-    currentTaskElement.querySelector('.task-icon img').setAttribute('src', updatedValues.iconPath);
-    currentTaskElement.querySelector('.task-dates').textContent = updatedValues.dates;
-    delete confirmTaskModalBtn.dataset.editingTaskId;
-
-    toggleModalHandler();
-    clearUserInputs();
-    setAddTaskMode();
 }
 
 function archiveTaskHandler (id) {
