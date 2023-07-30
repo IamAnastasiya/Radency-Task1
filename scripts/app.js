@@ -1,8 +1,7 @@
-import {capitalizeFirstLetter, formatCategoryName, setCategoryIcon, getCurrentDate, extractDates} from './helper-functions.js';
+import {capitalizeFirstLetter, formatCategoryName, setCategoryIcon, extractDates} from './helper-functions.js';
 import * as data from './data-processing.js';
 
 const createTaskBtn = document.getElementById('create-task');
-
 const createTaskModal = document.getElementById('open-modal');
 const backdrop = document.getElementById('backdrop');
 
@@ -11,10 +10,7 @@ const addTaskModalBtn = document.querySelector('.btn-add');
 const cancelTaskModalBtn = document.querySelector('.btn-cancel');
 const confirmTaskModalBtn = document.querySelector('.btn-confirm');
 
-//archive related buttons
-const moveToArchiveBtn = document.querySelector('.archive');
-const moveToActiveBtn = document.querySelector('.unarchive');
-const deleteFromArchiveBtn = document.querySelector('.archive-delete');
+const archiveToggler = document.querySelector('.archive-toggler');
 
 const userInputs = createTaskModal.querySelectorAll('input');
 const [inputName, inputTask] = userInputs;
@@ -24,6 +20,13 @@ const userSelect = createTaskModal.querySelector('select');
 function toggleModalHandler() {
     createTaskModal.classList.toggle('visible');
     backdrop.classList.toggle('visible');
+}
+
+function toggleArchiveHandler() {
+    const archiveContainer = document.querySelector('.archive-container');
+    archiveContainer.classList.toggle('visible');
+    archiveContainer.classList.contains('visible') ? 
+    archiveToggler.textContent = 'Hide Archived' : archiveToggler.textContent = 'Show Archived';
 }
 
 function clearUserInputs() {
@@ -90,22 +93,52 @@ function updateCurrentTask() {
     currentTaskElement.querySelector('.task-dates').textContent = updatedValues.dates;
     delete confirmTaskModalBtn.dataset.editingTaskId;
 
-    console.log(data.tasks);
-
     toggleModalHandler();
     clearUserInputs();
     setAddTaskMode();
 }
 
-function archiveTaskHandler () {
+function archiveTaskHandler (id) {
+    const currentTask = data.getCurrentTaskData(id);
+    renderNewTaskElement(currentTask, 'archive-template');
+    data.moveTaskData(data.tasks, data.archivedTasks, id);
+
+    deleteTaskFromUI(id);
+    setListenersForArchivedTask(id);
     updateSummaryTable();
 }
 
-function deleteTaskHandler (event, id) {
-    const currentTaskElement = event.target.closest('li');
-    currentTaskElement.remove();
-    data.deleteTaskData(id);
+function unArchiveTaskHandler (id) {
+    const currentTask = data.getCurrentTaskData(id, 'archive');
+    deleteTaskFromUI(id);
+
+    renderNewTaskElement(currentTask, 'task-template');
+    data.moveTaskData(data.archivedTasks, data.tasks, id);
+
+    handleActionBtnsEvents(id);
     updateSummaryTable();
+}
+
+function setListenersForArchivedTask(id) {
+    const currentTaskElement = document.querySelector(`[data-task-id=${id}]`);
+
+    const deleteFromArchiveBtn = currentTaskElement.querySelector('.archive-delete');
+    const unarchiveBtn = currentTaskElement.querySelector('.unarchive');
+
+    deleteFromArchiveBtn.addEventListener('click', () => { deleteTaskHandler(id, 'archive') });
+    unarchiveBtn.addEventListener('click', () => { unArchiveTaskHandler(id) });
+}
+
+
+function deleteTaskHandler (id, source) {
+    deleteTaskFromUI(id);
+    data.deleteTaskData(id, source);
+    updateSummaryTable();
+}
+
+function deleteTaskFromUI(id) {
+    const currentTaskElement = document.querySelector(`[data-task-id=${id}]`);
+    currentTaskElement.remove();
 }
 
 function handleActionBtnsEvents(id) {
@@ -116,12 +149,12 @@ function handleActionBtnsEvents(id) {
     const deleteButton = currentTaskElement.querySelector('.delete');
 
     editButton.addEventListener('click', () => {editTaskHandler(id)});
-    archiveButton.addEventListener('click', archiveTaskHandler);
-    deleteButton.addEventListener('click', (event) => {deleteTaskHandler(event, id)});
+    archiveButton.addEventListener('click', () => {archiveTaskHandler(id)});
+    deleteButton.addEventListener('click', () => {deleteTaskHandler(id, 'active')});
 }
 
-function renderNewTaskElement(taskDetails) {
-    const taskTemplate = document.getElementById('task-template');
+function renderNewTaskElement(taskDetails, template) {
+    const taskTemplate = document.getElementById(template);
     const newTaskElement = taskTemplate.content.firstElementChild.cloneNode(true);
     const taskIcon = newTaskElement.querySelector('.task-icon img');
     taskIcon.src = taskDetails.iconPath;
@@ -132,14 +165,19 @@ function renderNewTaskElement(taskDetails) {
     newTaskElement.querySelector('.task-content').textContent = capitalizeFirstLetter(taskDetails.task);
     newTaskElement.querySelector('.task-dates').textContent = taskDetails.dates;
     newTaskElement.dataset.taskId = taskDetails.id;
-
-    const listRootElement = document.querySelector('.tasks-list');
-    listRootElement.append(newTaskElement);
+    
+    if (template === 'task-template') {
+        const listRootElement = document.querySelector('.tasks-list');
+        listRootElement.append(newTaskElement);
+    } else if (template === 'archive-template') {
+        const archiveListElement = document.querySelector('.archive-list');
+        archiveListElement.append(newTaskElement);
+    }  
 }
 
 function renderExistingTasks() {
     data.tasks.length && data.tasks.forEach(task => {
-        renderNewTaskElement(task);
+        renderNewTaskElement(task, 'task-template');
         handleActionBtnsEvents(task.id);
         updateSummaryTable();
     })
@@ -153,28 +191,20 @@ function updateSummaryTable() {
 }
 
 function addNewTaskHandler() {
-    const newTask = {
-        id: Date.now().toString(36),
-        name: capitalizeFirstLetter(inputName.value),
-        task: capitalizeFirstLetter(inputTask.value),
-        date: getCurrentDate(),
-        category: userSelect.value,
-        dates: extractDates(inputTask.value),
-        iconPath: setCategoryIcon(userSelect.value)
-    }
+    const newTask = data.createNewTask(inputName.value, inputTask.value, userSelect.value);
 
     data.addTaskData(newTask);
 
     clearUserInputs();
-    renderNewTaskElement(newTask);
+    renderNewTaskElement(newTask, 'task-template');
     updateSummaryTable();
     toggleModalHandler();
     handleActionBtnsEvents(newTask.id);
 }
 
-
 createTaskBtn.addEventListener('click', toggleModalHandler);
 backdrop.addEventListener('click', toggleModalHandler);
 cancelTaskModalBtn.addEventListener('click', toggleModalHandler);
 addTaskModalBtn.addEventListener('click', addNewTaskHandler);
+archiveToggler.addEventListener('click', toggleArchiveHandler);
 renderExistingTasks();

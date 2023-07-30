@@ -1,3 +1,5 @@
+import {capitalizeFirstLetter, setCategoryIcon, getCurrentDate, extractDates} from './helper-functions.js';
+
 export let tasks = [
     {
         "id": "lkob0fjh",
@@ -66,16 +68,36 @@ export let tasks = [
 
 export let archivedTasks = [];
 
-export function addTaskData (newTask) {
-    tasks.push(newTask);
+export function createNewTask(name, task, category) {
+    return {
+        id: Date.now().toString(36),
+        name: capitalizeFirstLetter(name),
+        task: capitalizeFirstLetter(task),
+        date: getCurrentDate(),
+        category: category,
+        dates: extractDates(task),
+        iconPath: setCategoryIcon(category)
+    }
 }
 
-export function deleteTaskData (id) {
-    tasks = tasks.filter(task => task.id !== id);
+export function addTaskData(task) {
+    tasks.push(task);
 }
 
-export function getCurrentTaskData(id) {
-    return tasks.find(task => task.id === id);
+export function deleteTaskData(id, source) {
+    if (source = 'active') {
+        tasks = tasks.filter(task => task.id !== id);
+    }
+
+    if (source = 'archive') {
+        archivedTasks = archivedTasks.filter(task => task.id !== id);
+    }
+}
+
+export function getCurrentTaskData(id, source) {
+    return source === 'archive' ? 
+    archivedTasks.find(task => task.id === id) : 
+    tasks.find(task => task.id === id);
 }
 
 export function updateTaskData(id, updatedValues) {
@@ -83,3 +105,23 @@ export function updateTaskData(id, updatedValues) {
     tasks[taskToUpdateIndex] = { ...tasks[taskToUpdateIndex], ...updatedValues };
 } 
 
+export function moveTaskData(source, destination, id) {
+    const sourceIndex = source.findIndex(obj => obj.id === id);
+
+    if (sourceIndex !== -1) {
+        const transferredObject = source.splice(sourceIndex, 1)[0];
+        destination.push(transferredObject);
+    }
+}
+
+// export function addTaskToArchive (task) {
+//     archivedTasks.push(task);
+// }
+
+// export function getArchivedTask(id) {
+//     return archivedTasks.find(task => task.id === id);
+// }
+
+export function deleteTaskFromArchive (id) {
+    archivedTasks = archivedTasks.filter(task => task.id !== id);
+}
