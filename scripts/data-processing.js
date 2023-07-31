@@ -117,3 +117,22 @@ export function moveTaskData(source, destination, id) {
 export function deleteTaskFromArchive (id) {
     archivedTasks = archivedTasks.filter(task => task.id !== id);
 }
+
+
+export function getCategoryCounts() {
+    const categoryCounts = {};
+  
+    tasks.forEach((task) => {
+      const category = task.category;
+      categoryCounts[category] = (categoryCounts[category] || { active: 0, archived: 0 });
+      categoryCounts[category].active++;
+    });
+  
+    archivedTasks.forEach((task) => {
+      const category = task.category;
+      categoryCounts[category] = (categoryCounts[category] || { active: 0, archived: 0 });
+      categoryCounts[category].archived++;
+    });
+  
+    return categoryCounts;
+}

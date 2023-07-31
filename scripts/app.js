@@ -9,6 +9,7 @@ const backdrop = document.getElementById('backdrop');
 const addTaskModalBtn = document.querySelector('.btn-add');
 const cancelTaskModalBtn = document.querySelector('.btn-cancel');
 const confirmTaskModalBtn = document.querySelector('.btn-confirm');
+const summaryTable = document.querySelector('.summary-table');
 
 const archiveToggler = document.querySelector('.archive-toggler');
 
@@ -88,6 +89,7 @@ function updateCurrentTask() {
 
         toggleModalHandler();
         clearUserInputs();
+        updateSummaryTable();
         setAddTaskMode();
     } catch (error) {
         console.error('An error occurred while updating the task:', error);
@@ -124,7 +126,6 @@ function setListenersForArchivedTask(id) {
     deleteFromArchiveBtn.addEventListener('click', () => { deleteTaskHandler(id, 'archive') });
     unarchiveBtn.addEventListener('click', () => { unArchiveTaskHandler(id) });
 }
-
 
 function deleteTaskHandler (id, source) {
     deleteTaskFromUI(id);
@@ -175,15 +176,61 @@ function renderExistingTasks() {
     data.tasks.length && data.tasks.forEach(task => {
         renderNewTaskElement(task, 'task-template');
         handleActionBtnsEvents(task.id);
-        updateSummaryTable();
     })
+    updateSummaryTable();
 }
 
 function updateSummaryTable() {
-    const activeTasksSumElement = document.querySelector('.tasks-active');
-    const archivedTasksSumElement = document.querySelector('.tasks-archived');
-    activeTasksSumElement.textContent = data.tasks.length;
-    archivedTasksSumElement.textContent = data.archivedTasks.length;
+    const categoryCounts = data.getCategoryCounts();
+    removeNonActiveCategories(categoryCounts);
+
+    for (const category in categoryCounts) {
+        const categoryData = {
+          name: category,
+          iconPath: setCategoryIcon(category),
+          active: categoryCounts[category].active,
+          archived: categoryCounts[category].archived,
+        };
+
+        const currentCategoryItem = document.querySelector(`span[data-category-name="${category}"]`);
+
+        if (currentCategoryItem) {
+            const categoryWrapper = currentCategoryItem.closest('.summary-item-wrapper');
+            updateExistingSummaryItem(categoryWrapper, categoryData);
+        } else {
+            const summaryItem = createSummaryItem(categoryData);
+            summaryTable.append(summaryItem);
+        }
+    }
+}
+
+function removeNonActiveCategories(activeCategories) {
+    const existingCategories = document.querySelectorAll('[data-category-name]');
+    existingCategories.forEach(existingCategory => { 
+        if (!(existingCategory.dataset.categoryName in activeCategories)) {
+            existingCategory.closest('.summary-item-wrapper').remove();
+        }
+    })
+}
+
+function updateExistingSummaryItem(existingSummaryItem, categoryData) {
+    existingSummaryItem.querySelector('.tasks-active').textContent = categoryData.active;
+    existingSummaryItem.querySelector('.tasks-archived').textContent = categoryData.archived;
+}
+
+function createSummaryItem(categoryData) {
+    const newSummaryItem = document.createElement('div');
+    newSummaryItem.className = 'summary-item-wrapper';
+    const categoryName = formatCategoryName(categoryData.name);
+    newSummaryItem.innerHTML = `
+        <div class="summary-task-icon">
+            <img  src="${categoryData.iconPath}" alt="summary-task-category" width="20" height="20"/>
+        </div>
+        <span class="summary-category-name" data-category-name=${categoryData.name}>${categoryName}</span>
+        <span class="tasks-active">${categoryData.active}</span>
+        <span class="tasks-archived">${categoryData.archived}</span>
+    `;
+    return newSummaryItem;
 }
 
 function addNewTaskHandler() {
@@ -195,7 +242,7 @@ function addNewTaskHandler() {
     renderNewTaskElement(newTask, 'task-template');
     updateSummaryTable();
     toggleModalHandler();
-    handleActionBtnsEvents(newTask.id);
+    handleActionBtnsEvents(newTask.id)
 }
 
 createTaskBtn.addEventListener('click', toggleModalHandler);
