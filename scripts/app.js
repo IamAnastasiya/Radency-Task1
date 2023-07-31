@@ -1,81 +1,41 @@
 import {capitalizeFirstLetter, formatCategoryName, setCategoryIcon, extractDates} from './helper-functions.js';
+import {updateSummaryTable} from './summary-handling.js';
+import * as modal from './modal-handling.js';
 import * as data from './data-processing.js';
 
 const createTaskBtn = document.getElementById('create-task');
-const createTaskModal = document.getElementById('open-modal');
-const backdrop = document.getElementById('backdrop');
-
-//modal buttons
-const addTaskModalBtn = document.querySelector('.btn-add');
-const cancelTaskModalBtn = document.querySelector('.btn-cancel');
-const confirmTaskModalBtn = document.querySelector('.btn-confirm');
-const summaryTable = document.querySelector('.summary-table');
-
 const archiveToggler = document.querySelector('.archive-toggler');
 
-const [inputName, inputTask] = createTaskModal.querySelectorAll('input');
-const userSelect = createTaskModal.querySelector('select');
 
-
-function toggleModalHandler() {
-    createTaskModal.classList.toggle('visible');
-    backdrop.classList.toggle('visible');
-}
-
-function toggleArchiveHandler() {
+function toggleArchiveHandler() {8
     const archiveContainer = document.querySelector('.archive-container');
     archiveContainer.classList.toggle('visible');
     archiveToggler.textContent = archiveContainer.classList.contains('visible') ? 'Hide Archived' : 'Show Archived';
 }
 
-function clearUserInputs() {
-    inputName.value = '';
-    inputTask.value = '';
-}
-
-function setAddTaskMode() {
-    addTaskModalBtn.style.display = 'block';
-    confirmTaskModalBtn.style.display = 'none';
-    clearUserInputs();
-}
-
-function setEditTaskMode() {
-    addTaskModalBtn.style.display = 'none';
-    confirmTaskModalBtn.style.display = 'block';
-}
-
 function editTaskHandler (id) {
-    confirmTaskModalBtn.dataset.editingTaskId = id;
-    populateModalForEditing(id);
+    modal.confirmTaskModalBtn.dataset.editingTaskId = id;
+    modal.populateModalForEditing(id);
 
-    confirmTaskModalBtn.removeEventListener('click', updateCurrentTask);
-    confirmTaskModalBtn.addEventListener('click', updateCurrentTask, {once: true});
+    modal.confirmTaskModalBtn.removeEventListener('click', updateCurrentTask);
+    modal.confirmTaskModalBtn.addEventListener('click', updateCurrentTask, {once: true});
 
     // to handle 'Cancel' editing option
-    backdrop.addEventListener('click', setAddTaskMode);
-    cancelTaskModalBtn.addEventListener('click', setAddTaskMode);
-}
-
-function populateModalForEditing(id) {
-    const editingTask = data.getCurrentTaskData(id);
-    [inputName.value, inputTask.value] = [editingTask.name, editingTask.task];
-    userSelect.value = editingTask.category;
-
-    setEditTaskMode();
-    toggleModalHandler();
+    modal.backdrop.addEventListener('click', modal.setAddTaskMode);
+    modal.cancelTaskModalBtn.addEventListener('click', modal.setAddTaskMode);
 }
 
 function updateCurrentTask() {
-    const editingTaskId = confirmTaskModalBtn.dataset.editingTaskId;
+    const editingTaskId = modal.confirmTaskModalBtn.dataset.editingTaskId;
     const currentTaskElement = document.querySelector(`[data-task-id=${editingTaskId}]`);
 
     try {
         const updatedValues = {
-            name: capitalizeFirstLetter(inputName.value),
-            task: capitalizeFirstLetter(inputTask.value),
-            category: userSelect.value,
-            dates: extractDates(inputTask.value),
-            iconPath: setCategoryIcon(userSelect.value)
+            name: capitalizeFirstLetter(modal.inputName.value),
+            task: capitalizeFirstLetter(modal.inputTask.value),
+            category: modal.userSelect.value,
+            dates: extractDates(modal.inputTask.value),
+            iconPath: setCategoryIcon(modal.userSelect.value)
         }
 
         data.updateTaskData(editingTaskId, updatedValues);
@@ -85,12 +45,12 @@ function updateCurrentTask() {
         currentTaskElement.querySelector('.task-category').textContent = formatCategoryName(updatedValues.category);
         currentTaskElement.querySelector('.task-icon img').setAttribute('src', updatedValues.iconPath);
         currentTaskElement.querySelector('.task-dates').textContent = updatedValues.dates;
-        delete confirmTaskModalBtn.dataset.editingTaskId;
+        delete modal.confirmTaskModalBtn.dataset.editingTaskId;
 
-        toggleModalHandler();
-        clearUserInputs();
+        modal.toggleModalHandler();
+        modal.clearUserInputs();
         updateSummaryTable();
-        setAddTaskMode();
+        modal.setAddTaskMode();
     } catch (error) {
         console.error('An error occurred while updating the task:', error);
     }
@@ -180,74 +140,21 @@ function renderExistingTasks() {
     updateSummaryTable();
 }
 
-function updateSummaryTable() {
-    const categoryCounts = data.getCategoryCounts();
-    removeNonActiveCategories(categoryCounts);
-
-    for (const category in categoryCounts) {
-        const categoryData = {
-          name: category,
-          iconPath: setCategoryIcon(category),
-          active: categoryCounts[category].active,
-          archived: categoryCounts[category].archived,
-        };
-
-        const currentCategoryItem = document.querySelector(`span[data-category-name="${category}"]`);
-
-        if (currentCategoryItem) {
-            const categoryWrapper = currentCategoryItem.closest('.summary-item-wrapper');
-            updateExistingSummaryItem(categoryWrapper, categoryData);
-        } else {
-            const summaryItem = createSummaryItem(categoryData);
-            summaryTable.append(summaryItem);
-        }
-    }
-}
-
-function removeNonActiveCategories(activeCategories) {
-    const existingCategories = document.querySelectorAll('[data-category-name]');
-    existingCategories.forEach(existingCategory => { 
-        if (!(existingCategory.dataset.categoryName in activeCategories)) {
-            existingCategory.closest('.summary-item-wrapper').remove();
-        }
-    })
-}
-
-function updateExistingSummaryItem(existingSummaryItem, categoryData) {
-    existingSummaryItem.querySelector('.tasks-active').textContent = categoryData.active;
-    existingSummaryItem.querySelector('.tasks-archived').textContent = categoryData.archived;
-}
-
-function createSummaryItem(categoryData) {
-    const newSummaryItem = document.createElement('div');
-    newSummaryItem.className = 'summary-item-wrapper';
-    const categoryName = formatCategoryName(categoryData.name);
-    newSummaryItem.innerHTML = `
-        <div class="summary-task-icon">
-            <img  src="${categoryData.iconPath}" alt="summary-task-category" width="20" height="20"/>
-        </div>
-        <span class="summary-category-name" data-category-name=${categoryData.name}>${categoryName}</span>
-        <span class="tasks-active">${categoryData.active}</span>
-        <span class="tasks-archived">${categoryData.archived}</span>
-    `;
-    return newSummaryItem;
-}
-
 function addNewTaskHandler() {
-    const newTask = data.createNewTask(inputName.value, inputTask.value, userSelect.value);
+    const newTask = data.createNewTask(modal.inputName.value, modal.inputTask.value, modal.userSelect.value);
 
     data.addTaskData(newTask);
 
-    clearUserInputs();
+    modal.clearUserInputs();
     renderNewTaskElement(newTask, 'task-template');
     updateSummaryTable();
-    toggleModalHandler();
+    modal.toggleModalHandler();
     handleActionBtnsEvents(newTask.id)
 }
 
-createTaskBtn.addEventListener('click', toggleModalHandler);
-backdrop.addEventListener('click', toggleModalHandler);
-cancelTaskModalBtn.addEventListener('click', toggleModalHandler);
-addTaskModalBtn.addEventListener('click', addNewTaskHandler);
+createTaskBtn.addEventListener('click', modal.toggleModalHandler);
+modal.backdrop.addEventListener('click', modal.toggleModalHandler);
+modal.cancelTaskModalBtn.addEventListener('click', modal.toggleModalHandler);
+modal.addTaskModalBtn.addEventListener('click', addNewTaskHandler);
 archiveToggler.addEventListener('click', toggleArchiveHandler);
 renderExistingTasks();
