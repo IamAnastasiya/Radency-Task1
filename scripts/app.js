@@ -1,17 +1,10 @@
 import {capitalizeFirstLetter, formatCategoryName, setCategoryIcon, extractDates} from './helper-functions.js';
 import {updateSummaryTable} from './summary-handling.js';
+import {archiveTaskHandler} from './archive-handling.js'
 import * as modal from './modal-handling.js';
 import * as data from './data-processing.js';
 
 const createTaskBtn = document.getElementById('create-task');
-const archiveToggler = document.querySelector('.archive-toggler');
-
-
-function toggleArchiveHandler() {8
-    const archiveContainer = document.querySelector('.archive-container');
-    archiveContainer.classList.toggle('visible');
-    archiveToggler.textContent = archiveContainer.classList.contains('visible') ? 'Hide Archived' : 'Show Archived';
-}
 
 function editTaskHandler (id) {
     modal.confirmTaskModalBtn.dataset.editingTaskId = id;
@@ -24,6 +17,7 @@ function editTaskHandler (id) {
     modal.backdrop.addEventListener('click', modal.setAddTaskMode);
     modal.cancelTaskModalBtn.addEventListener('click', modal.setAddTaskMode);
 }
+
 
 function updateCurrentTask() {
     const editingTaskId = modal.confirmTaskModalBtn.dataset.editingTaskId;
@@ -56,49 +50,18 @@ function updateCurrentTask() {
     }
 }
 
-function archiveTaskHandler (id) {
-    const currentTask = data.getCurrentTaskData(id);
-    renderNewTaskElement(currentTask, 'archive-template');
-    data.moveTaskData(data.tasks, data.archivedTasks, id);
-
-    deleteTaskFromUI(id);
-    setListenersForArchivedTask(id);
-    updateSummaryTable();
-}
-
-function unArchiveTaskHandler (id) {
-    const currentTask = data.getCurrentTaskData(id, 'archive');
-    deleteTaskFromUI(id);
-
-    renderNewTaskElement(currentTask, 'task-template');
-    data.moveTaskData(data.archivedTasks, data.tasks, id);
-
-    handleActionBtnsEvents(id);
-    updateSummaryTable();
-}
-
-function setListenersForArchivedTask(id) {
-    const currentTaskElement = document.querySelector(`[data-task-id=${id}]`);
-
-    const deleteFromArchiveBtn = currentTaskElement.querySelector('.archive-delete');
-    const unarchiveBtn = currentTaskElement.querySelector('.unarchive');
-
-    deleteFromArchiveBtn.addEventListener('click', () => { deleteTaskHandler(id, 'archive') });
-    unarchiveBtn.addEventListener('click', () => { unArchiveTaskHandler(id) });
-}
-
-function deleteTaskHandler (id, source) {
+export function deleteTaskHandler (id, source) {
     deleteTaskFromUI(id);
     data.deleteTaskData(id, source);
     updateSummaryTable();
 }
 
-function deleteTaskFromUI(id) {
+export function deleteTaskFromUI(id) {
     const currentTaskElement = document.querySelector(`[data-task-id=${id}]`);
     currentTaskElement.remove();
 }
 
-function handleActionBtnsEvents(id) {
+export function handleActionBtnsEvents(id) {
     const currentTaskElement = document.querySelector(`[data-task-id=${id}]`);
 
     const editButton = currentTaskElement.querySelector('.edit');
@@ -110,7 +73,7 @@ function handleActionBtnsEvents(id) {
     deleteButton.addEventListener('click', () => {deleteTaskHandler(id, 'active')});
 }
 
-function renderNewTaskElement(taskDetails, template) {
+export function renderNewTaskElement(taskDetails, template) {
     const taskTemplate = document.getElementById(template);
     const newTaskElement = taskTemplate.content.firstElementChild.cloneNode(true);
     const taskIcon = newTaskElement.querySelector('.task-icon img');
@@ -156,5 +119,4 @@ createTaskBtn.addEventListener('click', modal.toggleModalHandler);
 modal.backdrop.addEventListener('click', modal.toggleModalHandler);
 modal.cancelTaskModalBtn.addEventListener('click', modal.toggleModalHandler);
 modal.addTaskModalBtn.addEventListener('click', addNewTaskHandler);
-archiveToggler.addEventListener('click', toggleArchiveHandler);
 renderExistingTasks();
